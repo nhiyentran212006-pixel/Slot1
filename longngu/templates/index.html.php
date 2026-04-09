@@ -164,13 +164,18 @@
                          data-category="<?php echo $product['category_name']; ?>"
                          data-prescription="<?php echo $product['is_prescription']; ?>">
                         <div class="product-card">
-                            <a href="product_detail.php?id=<?php echo $product['product_id']; ?>" class="text-decoration-none d-flex flex-column h-100">
+                            <a href="product_detail.php?id=<?php echo $product['product_id']; ?>" class="text-decoration-none d-flex flex-column">
                                 <img src="uploads/<?php echo $product['image_url']; ?>" class="product-img w-100" onerror="this.src='https://placehold.co/200x200/f8fafc/94a3b8?text=HapVN'">
                                 <div class="product-category"><?php echo $product['category_name']; ?></div>
                                 <div class="product-title"><?php echo $product['name']; ?></div>
                                 <div class="product-price"><?php echo number_format($product['price'], 0, '.', ','); ?>đ</div>
-                                <button class="btn btn-buy mt-auto">Chọn mua</button>
                             </a>
+                            <form action="add_to_cart.php" method="POST" class="mt-auto">
+                                <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
+                                <button type="submit" class="btn btn-buy mt-auto">
+                                    <i class="fa-solid fa-cart-plus me-2"></i>Thêm vào giỏ
+                                </button>
+                            </form>
                         </div>
                     </div>
                 <?php }} ?>
