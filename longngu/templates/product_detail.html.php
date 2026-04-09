@@ -21,7 +21,7 @@
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="index.php">Trang chủ</a></li>
                 <li class="breadcrumb-item"><a href="#">Thuốc không kê đơn</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Panadol Extra</li>
+                <li class="breadcrumb-item active" aria-current="page"><?php echo htmlspecialchars($product["name"]); ?></li>
             </ol>
         </nav>
     </div>
@@ -35,7 +35,7 @@
                             <i class="fa-solid fa-file-prescription me-1"></i> Thuốc kê đơn
                         </div>
                         
-                        <img src="https://via.placeholder.com/500x500" alt="Panadol Extra" class="main-img img-fluid">
+                        <img src="uploads/<?php echo htmlspecialchars($product["image_url"]); ?>" alt="<?php echo htmlspecialchars($product["name"]); ?>" class="main-img img-fluid" onerror="this.src='https://placehold.co/500x500/f8fafc/94a3b8?text=HapVN'">
                     </div>
                 </div>
 
@@ -65,8 +65,16 @@
                             <div class="policy-item"><i class="fa-solid fa-rotate-left text-warning"></i> Đổi trả 7 ngày</div>
                         </div>
 
-                        <div class="d-flex align-items-center gap-3 mb-4">
-                            
+                                                <div class="d-flex align-items-center gap-3 mb-4">
+                            <form action="add_to_cart.php" method="POST" class="d-inline">
+                                <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
+                                <button type="submit" class="btn btn-success btn-lg px-4">
+                                    <i class="fa-solid fa-cart-plus me-2"></i>Thêm vào giỏ hàng
+                                </button>
+                            </form>
+                            <a href="checkout.php" class="btn btn-outline-primary btn-lg px-4">
+                                <i class="fa-solid fa-credit-card me-2"></i>Thanh toán
+                            </a>
                         </div>
                         
                         <div class="alert alert-info py-2 small">

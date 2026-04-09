@@ -1,36 +1,39 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$cartCount = 0;
+if (isset($_SESSION['user_id'])) {
+    include_once 'includes/databaseconnection.php';
+    if (isset($pdo)) {
+        $stmtCart = $pdo->prepare('SELECT COALESCE(SUM(quantity), 0) FROM cart WHERE user_id = :user_id');
+        $stmtCart->execute(['user_id' => $_SESSION['user_id']]);
+        $cartCount = (int) $stmtCart->fetchColumn();
+    }
+}
+?>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-    /* ==========================================
-       NAVBAR VIP - THANH TÌM KIẾM & MENU VIÊN THUỐC
-       ========================================== */
     .navbar-top { background: #ffffff; padding: 15px 0; border-bottom: none; box-shadow: 0 2px 10px rgba(0,0,0,0.03); position: relative; z-index: 1001; }
-    
     .search-bar-custom { display: flex; background: #fff; border-radius: 50px; height: 48px; width: 100%; max-width: 650px; margin: 0 auto; overflow: hidden; border: 2px solid #00b894; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0, 184, 148, 0.1); }
-    /* Tăng font chữ input tìm kiếm lên 16px */
     .search-bar-custom input { border: none; outline: none; background: transparent; padding: 0 20px; flex-grow: 1; font-size: 16px; color: #1e293b; }
-    /* Tăng icon tìm kiếm lên 18px */
     .search-bar-custom button { background: #00b894; border: none; color: white; width: 70px; cursor: pointer; font-size: 18px; transition: 0.2s; }
     .search-bar-custom button:hover { background: #00947a; }
-    
     .navbar-bottom { background: #ffffff; border-top: 1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 1000; }
-    
     .category-nav { display: flex; gap: 12px; padding: 12px 0; }
-    /* Tăng font chữ menu ngang lên 15px */
     .category-nav a { color: #475569; font-weight: 600; font-size: 15px; padding: 10px 22px; border-radius: 50px; display: inline-block; text-decoration: none; background-color: #f1f5f9; transition: 0.3s; cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
     .category-nav a:hover { color: #00b894; background-color: #e6fdf5; border-color: #a7f3d0; }
     .category-nav a.active-nav { background-color: #00b894; color: #ffffff; box-shadow: 0 4px 10px rgba(0,184,148,0.25); border-color: #00b894; }
-    
     .btn-hamburger { background: transparent; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
     .btn-hamburger:hover { background: #f1f5f9; }
-    
-    /* Tăng font chữ bộ lọc ngang lên 14px */
     .filter-select { padding: 8px 30px 8px 16px !important; font-size: 14px !important; font-weight: 500 !important; color: #334155 !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; cursor: pointer; background-color: #fff !important; }
     .filter-select:focus { border-color: #00b894 !important; box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.15) !important; }
-    
-    /* Tăng font chữ menu 3 gạch lên 16px */
     .offcanvas-menu-item { cursor: pointer; transition: all 0.2s ease; color: #334155; font-weight: 500; font-size: 16px;}
     .offcanvas-menu-item:hover { background-color: #f8fafc; color: #00b894 !important; padding-left: 20px !important; border-left: 3px solid #00b894 !important; }
+    .nav-icon-link { color: #475569; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    .nav-icon-link:hover { color: #00b894; }
 </style>
 
 <div class="navbar-top">
@@ -43,7 +46,7 @@
                 <i class="fa-solid fa-leaf"></i> HapVN
             </a>
         </div>
-        
+
         <div class="flex-grow-1 mx-lg-5">
             <div class="search-bar-custom">
                 <input type="text" id="searchInput" onkeyup="applyFilters()" placeholder="Tìm kiếm thuốc, bệnh lý, thực phẩm chức năng...">
@@ -54,11 +57,22 @@
         </div>
 
         <div class="d-flex align-items-center gap-4 d-none d-lg-flex">
-            <div class="position-relative cursor-pointer" style="transition: 0.2s;">
-                <i class="fa-solid fa-cart-shopping text-secondary" style="font-size: 26px;"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-2 border-white shadow-sm">0</span>
-            </div>
-            <i class="fa-solid fa-circle-user text-secondary cursor-pointer" style="font-size: 30px;"></i>
+            <a href="checkout.php" class="position-relative nav-icon-link" title="Giỏ hàng">
+                <i class="fa-solid fa-cart-shopping" style="font-size: 26px;"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-2 border-white shadow-sm"><?php echo $cartCount; ?></span>
+            </a>
+
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <a href="account.php" class="nav-icon-link" title="Tài khoản">
+                    <i class="fa-solid fa-circle-user" style="font-size: 30px;"></i>
+                    <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                </a>
+            <?php else: ?>
+                <a href="authentication.php" class="nav-icon-link" title="Đăng nhập">
+                    <i class="fa-solid fa-right-to-bracket" style="font-size: 24px;"></i>
+                    <span>Đăng nhập</span>
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -72,7 +86,7 @@
             <a onclick="handleGlobalNav('Thực phẩm chức năng')" class="nav-item-tpcn">TPCN</a>
             <a onclick="handleGlobalNav('Dụng cụ y tế')" class="nav-item-yte">Dụng cụ y tế</a>
         </div>
-        
+
         <div class="d-flex gap-3 py-2 align-items-center" id="globalFiltersContainer">
             <select class="form-select filter-select" id="mainPriceFilter" onchange="applyFilters()">
                 <option value="all">Mọi mức giá</option>
@@ -122,7 +136,7 @@ function handleGlobalNav(cat) {
     else if(cat === 'otc') targetClass = '.nav-item-otc';
     else if(cat === 'Thực phẩm chức năng') targetClass = '.nav-item-tpcn';
     else if(cat === 'Dụng cụ y tế') targetClass = '.nav-item-yte';
-    
+
     const targetEl = document.querySelector(targetClass);
     if(targetEl) {
         targetEl.classList.add('active-nav');
